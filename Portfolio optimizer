@@ -9,17 +9,32 @@ def simulate( dt_start, dt_end, ls_symbols, alloc) :
  c_dataobj = da.DataAccess('Yahoo')
  ldf_data = c_dataobj.get_data(ldt_timestamps, ls_symbols, ['close'])
  d_data = dict(zip(['close'], ldf_data))
-
+ #calculate portfolio value for every day
  portfolio = np.dot(d_data['close'].values, alloc)
-
+ #normalize data
+ normalized_portfolio = portfolio / portfolio[0]
+ #calculate daily returns
+ rets = normalized_portfolio.copy()
+ tsu.returnize0(rets)
+ #average daily return
+ avg = np.average(rets)
+ #volatility of daily returns
+ volat = np.std(rets)
+ #Sharpe ratio
+ SR = np.sqrt(252)*avg/volat
+ #plot result
  plt.clf()
- plt.plot(ldt_timestamps, portfolio)
+ plt.plot(ldt_timestamps, rets)
  plt.legend('Portfolio')
  plt.ylabel('Adjusted Close')
  plt.xlabel('Date')
  plt.savefig('adjustedclose.pdf', format='pdf')
 
- print len(portfolio)
+ print 'Sharpe ratio: {SR}'
+ print volat
+ print avg
+
+
  return;
 
 import QSTK.qstkutil.qsdateutil as du
@@ -31,4 +46,4 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-simulate (dt.datetime(2011,1,1),dt.datetime(2011,12,31),["GOOG", "AAPL", "GLD", "XOM"],[0.2,0.3,0.4,0.1])
+simulate (dt.datetime(2011,1,1),dt.datetime(2011,12,31),['AAPL', 'GLD', 'GOOG', 'XOM'],[0.4, 0.4, 0.0, 0.2])
