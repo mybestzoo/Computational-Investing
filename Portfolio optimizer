@@ -7,14 +7,13 @@ def simulate( dt_start, dt_end, ls_symbols, alloc) :
  ldt_timestamps = du.getNYSEdays(dt_start, dt_end, dt_timeofday)
  #read data
  c_dataobj = da.DataAccess('Yahoo')
- ldf_data = c_dataobj.get_data(ldt_timestamps, ls_symbols, ['close'])
- d_data = dict(zip(['close'], ldf_data))
+ ls_keys = ['open' , 'high' , 'low' , 'close' , 'volume' , 'actual_close']
+ ldf_data = c_dataobj.get_data(ldt_timestamps, ls_symbols, ls_keys)
+ d_data = dict(zip(ls_keys, ldf_data))
  #calculate portfolio value for every day
  portfolio = np.dot(d_data['close'].values, alloc)
- #normalize data
- normalized_portfolio = portfolio / portfolio[0]
  #calculate daily returns
- rets = normalized_portfolio.copy()
+ rets = portfolio.copy()
  tsu.returnize0(rets)
  #average daily return
  avg = np.average(rets)
@@ -24,18 +23,15 @@ def simulate( dt_start, dt_end, ls_symbols, alloc) :
  SR = np.sqrt(252)*avg/volat
  #plot result
  plt.clf()
+ fig = plt.figure()
  plt.plot(ldt_timestamps, rets)
- plt.legend('Portfolio')
+ plt.legend('ls_symbols')
  plt.ylabel('Adjusted Close')
  plt.xlabel('Date')
+ fig.autofmt_xdate(rotation=45)
  plt.savefig('adjustedclose.pdf', format='pdf')
-
- print 'Sharpe ratio: {SR}'
- print volat
- print avg
-
-
- return;
+ 
+ return (SR, volat, avg);
 
 import QSTK.qstkutil.qsdateutil as du
 import QSTK.qstkutil.tsutil as tsu
@@ -46,4 +42,13 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-simulate (dt.datetime(2011,1,1),dt.datetime(2011,12,31),['AAPL', 'GLD', 'GOOG', 'XOM'],[0.4, 0.4, 0.0, 0.2])
+for h in range(0,10)
+	
+
+[SR,volat, avg] = simulate (dt.datetime(2011,1,1) , dt.datetime(2011,12,31) , ['AAPL', 'GLD', 'GOOG', 'XOM'] , [0.4, 0.4, 0.0, 0.2])
+#simulate (dt.datetime(2010,1,1) , dt.datetime(2010,12,31) ,  ['AXP', 'HPQ', 'IBM', 'HNZ'] , [0.0, 0.0, 0.0, 1.0])
+
+print ('Sharpe ratio' , SR)
+print ('Volatility' , volat)
+print ('Average return' , avg)
+
