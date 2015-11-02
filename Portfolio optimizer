@@ -10,8 +10,13 @@ def simulate( dt_start, dt_end, ls_symbols, alloc) :
  ls_keys = ['open' , 'high' , 'low' , 'close' , 'volume' , 'actual_close']
  ldf_data = c_dataobj.get_data(ldt_timestamps, ls_symbols, ls_keys)
  d_data = dict(zip(ls_keys, ldf_data))
+ #normalize prices
+ normalized_price = d_data['close'].values/d_data['close'].values[0,:]
  #calculate portfolio value for every day
- portfolio = np.dot(d_data['close'].values, alloc)
+ portfolio = np.dot(normalized_price, alloc)
+ #calculate cumulative return
+ cum_ret = portfolio/portfolio[0]
+ cumulative_return = cum_ret[-1]
  #calculate daily returns
  rets = portfolio.copy()
  tsu.returnize0(rets)
@@ -31,22 +36,23 @@ def simulate( dt_start, dt_end, ls_symbols, alloc) :
  #fig.autofmt_xdate(rotation=45)
  #plt.savefig('adjustedclose.pdf', format='pdf')
  
- return (SR, volat, avg);
+ return (SR, volat, avg, cumulative_return);
 
 def Protfolio_optimizer( dt_start , dt_end , ls_symbols) :
  SR = 0	
  for h in range (0,11) :
 	for k in range (0,11) :
 		for l in range (0,11) :
-			if 1-0.1*(h-k-l)>=0 :
-				[SR_temp,volat_temp, avg_temp] = simulate (dt.datetime(2011,1,1) , dt.datetime(2011,12,31) , ['AAPL', 'GLD', 'GOOG', 'XOM'] , [h , k , l , 1-0.1*(h-k-l)])
+			if (1-0.1*(h+k+l))>=0 :
+				[SR_temp , volat_temp , avg_temp , cumulative_return_temp] = simulate (dt_start , dt_end , ls_symbols , [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h+k+l)])
 				if SR_temp>SR :
 					SR = SR_temp
 					volat = volat_temp
 					avg  = avg_temp
-					Opt_alloc =  [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h-k-l)]	
+					Opt_alloc =  [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h+k+l)]
+					cumulative_return = cumulative_return_temp	
 
- return (SR, volat, avg, Opt_alloc)	
+ return (SR , volat , avg , Opt_alloc , cumulative_return)	
  
 import QSTK.qstkutil.qsdateutil as du
 import QSTK.qstkutil.tsutil as tsu
@@ -57,10 +63,11 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-[SR , volat , avg , Opt_alloc] = Protfolio_optimizer(dt.datetime(2011,1,1) , dt.datetime(2011,12,31) , ['AAPL', 'GLD', 'GOOG', 'XOM'])
+[SR , volat , avg , Opt_alloc , cumulative_return] = Protfolio_optimizer(dt.datetime(2011,1,1) , dt.datetime(2011,12,31) , ['AAPL', 'GLD', 'GOOG', 'XOM'])
 
 print ('Sharpe ratio' , SR)
 print ('Volatility' , volat)
 print ('Average return' , avg)
-print ('Allocation', Opt_alloc)
+print ('Allocation' , Opt_alloc)
+print ('Cumulative return' , cumulative_return)
 
