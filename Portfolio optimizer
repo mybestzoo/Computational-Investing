@@ -38,21 +38,20 @@ def simulate( dt_start, dt_end, ls_symbols, alloc) :
  
  return (SR, volat, avg, cumulative_return);
 
-def Protfolio_optimizer( dt_start , dt_end , ls_symbols) :
+def Grid_optimizer( dt_start , dt_end , ls_symbols) :
  SR = 0	
  for h in range (0,11) :
-	for k in range (0,11) :
-		for l in range (0,11) :
-			if (1-0.1*(h+k+l))>=0 :
-				[SR_temp , volat_temp , avg_temp , cumulative_return_temp] = simulate (dt_start , dt_end , ls_symbols , [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h+k+l)])
-				if SR_temp>SR :
-					SR = SR_temp
-					volat = volat_temp
-					avg  = avg_temp
-					Opt_alloc =  [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h+k+l)]
-					cumulative_return = cumulative_return_temp	
+	for k in range (0,11-h) :
+		for l in range (0,11-h-k) :
+			[SR_temp , volat_temp , avg_temp , cumulative_return_temp] = simulate (dt_start , dt_end , ls_symbols , [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h+k+l)])
+			if SR_temp>SR :
+				SR = SR_temp
+				volat = volat_temp
+				avg  = avg_temp
+				Opt_alloc =  [0.1*h , 0.1*k , 0.1*l , 1-0.1*(h+k+l)]
+				cumulative_return = cumulative_return_temp	
 
- return (SR , volat , avg , Opt_alloc , cumulative_return)	
+ return (SR , volat , avg , Opt_alloc , cumulative_return)
  
 import QSTK.qstkutil.qsdateutil as du
 import QSTK.qstkutil.tsutil as tsu
@@ -63,11 +62,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 
-[SR , volat , avg , Opt_alloc , cumulative_return] = Protfolio_optimizer(dt.datetime(2011,1,1) , dt.datetime(2011,12,31) , ['AAPL', 'GLD', 'GOOG', 'XOM'])
+[SR , volat , avg , Opt_alloc , cumulative_return] = Grid_optimizer(dt.datetime(2011,1,1) , dt.datetime(2011,12,31) , ['AAPL', 'GLD', 'GOOG', 'XOM'])
 
 print ('Sharpe ratio' , SR)
 print ('Volatility' , volat)
 print ('Average return' , avg)
 print ('Allocation' , Opt_alloc)
 print ('Cumulative return' , cumulative_return)
-
