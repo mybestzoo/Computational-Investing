@@ -18,26 +18,48 @@ def marketsim( start_cash, orders_file ) :
  symbols = []
  dates = []
  for row in orders:
-	dates.append(dt.date(int(row[0]),int(row[1]),int(row[2])))
+	dates.append(dt.datetime(int(row[0]),int(row[1]),int(row[2])))
 	symbols.append(row[3])
-	print(1)
  #remove duplicates
  symbols = list(set(symbols))
  dates = list(set(dates))
  #set the data provider to Yahoo
  database = da.DataAccess('Yahoo')
  #timestamps for close of every trading day ?: add +dt.timedelta(days=1)
- timestamps = du.getNYSEdays( dates[0] , dates[-1] , dt.timedelta(hours=16) )
+ timestamps = du.getNYSEdays( min(dates) , max(dates)+dt.timedelta(days=1) , dt.timedelta(hours=16) )
  #read actual close price for symbols on dates
- data = database.get_data(timestamps,symbols,'actual_close')
+ price = database.get_data(timestamps,symbols,'close')
  #create trade matrix
  trade_matrix = pd.DataFrame( 0 , index = timestamps , columns = symbols)
- #fill trade matrix with number of shares
+ #create cash timeseries with 1000000 initial
+ cash = pd.Series( 0 , index = timestamps , name = 'Cash')
+ cash[0] = 1000000.0
+ #fill trade matrix with number of traded shares and cash with cash used in trades
+ orders = csv.reader(open(orders_file,'rU'),delimiter=',')
  for row in orders:
-	dates.append(dt.date(int(row[0]),int(row[1]),int(row[2])))
-	symbols.append(row[3])
-	print(0);
+	date = str(dt.date(int(row[0]),int(row[1]),int(row[2])))
+	if row[4] == 'Buy':
+		i = 1.0
+	else:
+		i = -1.0	
+	trade_matrix.loc[date,row[3]] = trade_matrix.loc[date,row[3]] + i*float(row[5])
+	cash[date] = cash[date] - i*float(row[5])*float(price.loc[date,row[3]])
+ #append cash to price
+ price['Cash'] = 1.0
+ trade_matrix['Cash'] = cash
+ #use cummulative sum to convert the trade matrix into holding matrix
+ trade_matrix = np.cumsum(trade_matrix)
+ #multiply price to trade_matrix to get holdings
+ fund = pd.Series(np.diag(np.dot(trade_matrix,price.transpose())), index = timestamps , name = 'Fund')
+ #write the time-series to csv
+ writer = csv.writer(open('portfolio.csv','wb'), delimiter=',')
+ for row_index in fund.index:
+	 print row_index # this is a datetime object
+	 print fund[row_index] # this is a single value
+	 row_to_enter = [row_index,fund[row_index]]
+	 writer.writerow(row_to_enter)
  return ;
+ 	 
 
 start_cash = sys.argv[1]
 orders_file  = sys.argv[2]
@@ -46,4 +68,3 @@ orders_file  = sys.argv[2]
 #print 'Argument List:', str(sys.argv)
  
 marketsim( start_cash, orders_file )
-
