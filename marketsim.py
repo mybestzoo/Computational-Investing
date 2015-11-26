@@ -11,6 +11,12 @@ import QSTK.qstkutil.DataAccess as da
 import QSTK.qstkutil.tsutil as tsu
 import QSTK.qstkstudy.EventProfiler as ep
 
+"""
+Accepts an amount of start cash along iwth csv file with orders
+Returns the csv file with cumulative value of portfolio
+
+"""
+
 def marketsim( start_cash, orders_file ) :
 #read csv
  orders = csv.reader(open(orders_file,'rU'),delimiter=',')
