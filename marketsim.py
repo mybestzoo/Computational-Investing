@@ -39,7 +39,7 @@ def marketsim( start_cash, orders_file ) :
  trade_matrix = pd.DataFrame( 0 , index = timestamps , columns = symbols)
  #create cash timeseries with 1000000 initial
  cash = pd.Series( 0 , index = timestamps , name = 'Cash')
- cash[0] = 1000000.0
+ cash[0] = float(start_cash)
  #fill trade matrix with number of traded shares and cash with cash used in trades
  orders = csv.reader(open(orders_file,'rU'),delimiter=',')
  for row in orders:
@@ -62,7 +62,7 @@ def marketsim( start_cash, orders_file ) :
  for row_index in fund.index:
 	 print row_index # this is a datetime object
 	 print fund[row_index] # this is a single value
-	 row_to_enter = [row_index,fund[row_index]]
+	 row_to_enter = [row_index.year,row_index.month,row_index.day,fund[row_index]]
 	 writer.writerow(row_to_enter)
  return ;
  	 
