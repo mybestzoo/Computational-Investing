@@ -59,13 +59,13 @@ def find_events(ls_symbols, d_data):
 			f_symprice_yest = df_close[s_sym].ix[ldt_timestamps[i - 1]]
 			# Event is found if the symbol goes less than 5 while the previous day t was more than 5
 			if f_symprice_today < 5.0 and f_symprice_yest >= 5.0:
-				buy_row = [ldt_timestamps[i] , s_sym, 'BUY', 100]
-				sell_row = [ldt_timestamps[i+5] , s_sym, 'SELL', 100]
+				buy_row = [ldt_timestamps[i].year, ldt_timestamps[i].month , ldt_timestamps[i].day  , s_sym, 'BUY', 100]
+				sell_row = [ldt_timestamps[i+5].year , ldt_timestamps[i+5].month , ldt_timestamps[i+5].day  , s_sym, 'SELL', 100]
 				writer.writerow(buy_row)
 				writer.writerow(sell_row)
 	
 	# sort csv by date
-	sortcsv('TradeOrders.csv',[0])
+	#sortcsv('TradeOrders.csv',[0])
 		
 		
 	return df_events
