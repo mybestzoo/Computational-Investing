@@ -1,3 +1,24 @@
+import sys
+import csv
+import pandas as pd
+import numpy as np
+import math
+import copy
+import QSTK.qstkutil.qsdateutil as du
+import datetime as dt
+import time
+import QSTK.qstkutil.DataAccess as da
+import QSTK.qstkutil.tsutil as tsu
+import QSTK.qstkstudy.EventProfiler as ep
+import matplotlib.pyplot as plt
+
+"""
+Accepts a csv file with portfolio values and a benchmark symbol
+Returns the statistics of the portfolio and plots a graph
+python analyze.py values.csv \$SPX
+
+"""
+
 def analyze( values_file , bench_symbol ) :
 # read csv
  orders = csv.reader(open(values_file,'rU'),delimiter=',')
@@ -5,8 +26,8 @@ def analyze( values_file , bench_symbol ) :
  values = []
  dates = []
  for row in orders:
-	dates.append(dt.datetime.strptime(row[0],"%Y-%m-%d %H:%M:%S"))
-	values.append(float(row[1]))	
+	dates.append(dt.datetime(int(row[0]),int(row[1]),int(row[2]),16,0,0))
+	values.append(float(row[3]))	
  # download prices for benchmark	
  # set the data provider to Yahoo
  database = da.DataAccess('Yahoo')
@@ -55,26 +76,10 @@ def analyze( values_file , bench_symbol ) :
  print( 'Average daily return of portfolio: %s' ) %avg_portfolio
  print( 'Average daily return of %s: %s' ) %(bench_symbol,avg_bench)
  return ;
-
-import sys
-import csv
-import pandas as pd
-import numpy as np
-import math
-import copy
-import QSTK.qstkutil.qsdateutil as du
-import datetime as dt
-import time
-import QSTK.qstkutil.DataAccess as da
-import QSTK.qstkutil.tsutil as tsu
-import QSTK.qstkstudy.EventProfiler as ep
-import matplotlib.pyplot as plt
  	 
+# main
 
 values_file = sys.argv[1]
 bench_symbol  = sys.argv[2]
-
-#print 'Number of arguments:', len(sys.argv), 'arguments.'
-#print 'Argument List:', str(sys.argv)
  
 analyze( values_file , bench_symbol )
