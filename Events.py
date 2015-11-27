@@ -17,29 +17,9 @@ When an event occurs, buy 100 shares of the equity on that day.
 Sell automatically 5 trading days later.
 """
 
-def sortcsv(csvfilename, themanyfieldscolumnnumbers):
-	data = csv.reader(open(csvfilename),delimiter=',')
-	sortedlist = sorted(data, key=operator.itemgetter(*themanyfieldscolumnnumbers))    # 0 specifies according to first column we want to sort
-    #now write the sorte result into new CSV file
-	with open("NewFile.csv", "wb") as f:
-		fileWriter = csv.writer(f, delimiter=',')
-		for row in sortedlist:
-			fileWriter.writerow(row)
-
-
-def sortcsv1(csvfilename, themanyfieldscolumnnumbers):
-  with open(csvfilename, 'rb') as f:
-    readit = csv.reader(f)
-    thedata = list(readit)
-  thedata.sort(key=operator.itemgetter(*themanyfieldscolumnnumbers))
-  with open(csvfilename, 'wb') as f:
-    writeit = csv.writer(f)
-    writeit.writerows(thedata)
-
 def find_events(ls_symbols, d_data):
 	''' Finding the event dataframe '''
 	df_close = d_data['actual_close']
-	#ts_market = df_close['SPY']
 
 	print "Finding Events"
 
@@ -52,22 +32,23 @@ def find_events(ls_symbols, d_data):
 	
 	# create csv file for trade orders
 	writer = csv.writer(open('TradeOrders.csv','wb'), delimiter=',')	
-
+	l = 0
 	for s_sym in ls_symbols:
 		for i in range(1, len(ldt_timestamps)):
 			f_symprice_today = df_close[s_sym].ix[ldt_timestamps[i]]
 			f_symprice_yest = df_close[s_sym].ix[ldt_timestamps[i - 1]]
 			# Event is found if the symbol goes less than 5 while the previous day t was more than 5
 			if f_symprice_today < 5.0 and f_symprice_yest >= 5.0:
-				buy_row = [ldt_timestamps[i].year, ldt_timestamps[i].month , ldt_timestamps[i].day  , s_sym, 'BUY', 100]
-				sell_row = [ldt_timestamps[i+5].year , ldt_timestamps[i+5].month , ldt_timestamps[i+5].day  , s_sym, 'SELL', 100]
+				buy_row = [ldt_timestamps[i].year, ldt_timestamps[i].month , ldt_timestamps[i].day  , s_sym, 'Buy', 100]
+				sell_row = [ldt_timestamps[min(i+5,len(ldt_timestamps)-1)].year , ldt_timestamps[min(i+5,len(ldt_timestamps)-1)].month , ldt_timestamps[min(i+5,len(ldt_timestamps)-1)].day  , s_sym, 'Sell', 100]
 				writer.writerow(buy_row)
 				writer.writerow(sell_row)
+				l = l+1
 	
 	# sort csv by date
 	#sortcsv('TradeOrders.csv',[0])
 		
-		
+	print(l)	
 	return df_events
 
 
