@@ -37,7 +37,7 @@ def marketsim( start_cash, orders_file ) :
  price = database.get_data(timestamps,symbols,'close')
  #create trade matrix
  trade_matrix = pd.DataFrame( 0 , index = timestamps , columns = symbols)
- #create cash timeseries with 1000000 initial
+ #create cash timeseries with start_cash initial
  cash = pd.Series( 0 , index = timestamps , name = 'Cash')
  cash[0] = float(start_cash)
  #fill trade matrix with number of traded shares and cash with cash used in trades
