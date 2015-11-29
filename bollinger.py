@@ -10,6 +10,18 @@ Calculates the bollinger bands
 
 """
 
+def bollinger(price,period):
+    SMA = pd.rolling_mean(price,period,min_periods=period)
+    STD = pd.rolling_std(price,period,min_periods=period)
+    # bollinger bands
+    upper = SMA+STD
+    lower = SMA-STD
+    # bollinger indicator
+    bollinger_ind = (price-SMA)/STD
+    return bollinger_ind
+
+# main
+
 # set start date and end date + lookup period for rolling mean
 start = dt.datetime(2010, 1, 1)
 end = dt.datetime(2010, 12, 31)
@@ -30,7 +42,7 @@ upper = SMA+STD
 lower = SMA-STD
 
 # bollinger indicator
-bollinger_ind = (price-SMA)/STD
+bollinger_ind = bollinger(price,20)
 
 print(bollinger_ind[str(dt.date(2010, 6, 23))])
 
